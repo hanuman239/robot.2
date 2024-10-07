@@ -14,9 +14,3 @@ RoBot.2 သည် အသံဖြင့် မြန်မာဘာသာစက�
 - CSS
 - JavaScript
 
-## Installation
-
-1. **Git Clone**: Repository ကို clone လုပ်ပါ။
-
-   ```bash
-   git clone <repository-url>
