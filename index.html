@@ -66,4 +66,42 @@ button:hover {
     </div>
     <script src="script.js"></script>
 </body>
+  <script>
+  	document.getElementById('sendBtn').addEventListener('click', function() {
+    const userInput = document.getElementById('userInput').value;
+    if (userInput.trim() === '') return;
+
+    // Show user's message in chat box
+    const chatBox = document.getElementById('chatBox');
+    const userMessage = document.createElement('div');
+    userMessage.textContent = `သင်: ${userInput}`;
+    chatBox.appendChild(userMessage);
+
+    // Clear input field
+    document.getElementById('userInput').value = '';
+
+    // Generate bot response
+    const botResponse = getBotResponse(userInput);
+    const botMessage = document.createElement('div');
+    botMessage.textContent = `Bot: ${botResponse}`;
+    chatBox.appendChild(botMessage);
+
+    // Speak bot response
+    speak(botResponse);
+});
+
+// Function to get bot's response based on user input
+function getBotResponse(input) {
+    // Simple example: echo the user's input
+    return `သင်၏မေးခွန်းသည် "${input}" ဖြစ်ပါသည်။`;
+}
+
+// Function to speak text
+function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'my-MM'; // Myanmar language
+    window.speechSynthesis.speak(utterance);
+}
+
+  </script>
 </html>
