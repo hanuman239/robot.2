@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myanmar Chatbot with ChatGPT</title>
-
+    <title>Myanmar Chatbot with Web Speech API</title>
+  
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -71,58 +71,90 @@
             color: #3366cc;
         }
     </style>
+
+    <!-- Include RiveScript.js from CDN -->
+    <script src="https://unpkg.com/rivescript@2.1.0/dist/rivescript.min.js"></script>
 </head>
 <body>
 
-    <h1>Myanmar Chatbot with ChatGPT</h1>
+    <h1>Myanmar Chatbot with Web Speech API</h1>
 
     <div id="chatbox">
         <div id="output"></div>
         <input type="text" id="input" placeholder="Type something..." autocomplete="off">
         <button id="send">Send</button>
+        <button id="voice">Use Voice</button>
     </div>
 
     <script>
-        const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with your OpenAI API key
+        // Initialize RiveScript bot
+        const bot = new RiveScript();
 
-        // Function to send a request to the ChatGPT API
-        async function getChatGPTResponse(userInput) {
-            const response = await fetch("https://api.openai.com/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: "gpt-3.5-turbo",
-                    messages: [{ role: "user", content: userInput }]
-                })
-            });
-            const data = await response.json();
-            return data.choices[0].message.content;
-        }
+        // Define your RiveScript content directly in the HTML
+        const brain = `
+            ! version = 2.0
 
-        // Handle user input and bot reply
-        document.querySelector("#send").addEventListener("click", async () => {
+            + မင်္ဂလာပါ
+            - မင်္ဂလာပါ! ဘယ်လိုကူညီပေးရမလဲ?
+
+            + ကျေးဇူးတင်ပါတယ်
+            - အေးပါတယ်! ကျေးဇူးပြု၍ ထပ်မံမေးမြန်းပါ။
+
+            + အမည်ကဘာလဲ
+            - ငါ့နာမည်က Chatbot ပါ။
+        `;
+
+        bot.stream(brain);
+        bot.sortReplies();
+
+        // Function to handle user input and bot reply
+        document.querySelector("#send").addEventListener("click", () => {
             const input = document.querySelector("#input").value;
             if (input.trim() !== "") {
                 document.querySelector("#output").innerHTML += `<p><b>User:</b> ${input}</p>`;
                 
-                // Get response from ChatGPT
-                const reply = await getChatGPTResponse(input);
+                // Get reply from RiveScript bot
+                const reply = bot.reply("local-user", input);
                 document.querySelector("#output").innerHTML += `<p><b>Bot:</b> ${reply}</p>`;
+                
                 document.querySelector("#input").value = "";
                 document.querySelector("#output").scrollTop = document.querySelector("#output").scrollHeight;
+
+                // Speak the bot's reply
+                speak(reply);
             }
         });
 
-        // Allow pressing Enter to send the message
+        // Function to speak text
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "my-MM"; // Set to Myanmar language
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Allow using voice input
+        document.querySelector("#voice").addEventListener("click", () => {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "my-MM"; // Set recognition language to Myanmar
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.querySelector("#input").value = transcript; // Fill input with recognized speech
+                document.querySelector("#send").click(); // Send the message automatically
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+            };
+        });
+
+        // Send message on Enter key press
         document.querySelector("#input").addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
                 document.querySelector("#send").click();
             }
         });
     </script>
-
 </body>
 </html>
